@@ -44,4 +44,7 @@ features:
   - icon: 📊
     title: 算法
     details: 学习路径、常见算法题解析、时间空间复杂度
+  - icon: 🧭
+    title: 开发方法论
+    details: 需求分析、技术方案设计、编码原则、性能优化、上线流程、故障处理
 ---

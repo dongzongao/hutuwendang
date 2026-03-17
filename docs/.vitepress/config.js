@@ -15,6 +15,7 @@ export default defineConfig({
       { text: '数据库', link: '/database/MySQL详解' },
       { text: '网络', link: '/network/HTTP与HTTPS细节区别' },
       { text: '算法', link: '/algorithm/算法学习路径' },
+      { text: '方法论', link: '/methodology/开发方法论' },
     ],
     sidebar: {
       '/java/': [
@@ -119,6 +120,14 @@ export default defineConfig({
             { text: '算法学习路径', link: '/algorithm/算法学习路径' },
             { text: '算法题与解题思路', link: '/algorithm/算法题与解题思路' },
             { text: '时间与空间复杂度', link: '/algorithm/时间与空间复杂度' },
+          ]
+        }
+      ],
+      '/methodology/': [
+        {
+          text: '开发方法论',
+          items: [
+            { text: '开发方法论', link: '/methodology/开发方法论' },
           ]
         }
       ],
