@@ -124,7 +124,7 @@ export default defineConfig({
     },
     search: { provider: 'local' },
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/dongzongao/hexinjishudian' }
+      { icon: 'github', link: 'https://github.com/dongzongao/hutuwendang' }
     ],
     footer: {
       message: '后端核心技术点知识库',
