@@ -101,7 +101,7 @@ public class HelloController {
 ### 2.4 配置文件
 
 **application.properties**：
-```properties
+```ini
 # 服务器配置
 server.port=8080
 server.servlet.context-path=/api

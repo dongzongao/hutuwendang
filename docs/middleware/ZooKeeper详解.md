@@ -522,7 +522,7 @@ public class MasterElection {
 
 ### 5.1 配置文件（zoo.cfg）
 
-```properties
+```ini
 # 数据目录
 dataDir=/var/lib/zookeeper
 
@@ -888,7 +888,7 @@ public class CuratorLock {
 
 ### 7.1 配置优化
 
-```properties
+```ini
 # 增加快照频率（事务数）
 snapCount=100000
 

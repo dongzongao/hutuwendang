@@ -709,7 +709,7 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector {
 
 ### 6.4 spring.factories 文件
 
-```properties
+```ini
 # spring-boot-autoconfigure.jar 中的 META-INF/spring.factories
 
 # Auto Configure

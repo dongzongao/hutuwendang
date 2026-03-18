@@ -208,3 +208,53 @@ public void consume(ConsumerRecord<String, String> record) {
 2. 消费方：先查后处理，处理和记录同事务
 3. 兜底：数据库唯一索引作为最后防线
 4. 监控：记录重复消费次数，异常频繁时告警排查上游
+
+---
+
+## 10. Kafka 重复消费专项
+
+### 为什么 Kafka 更容易重复
+
+1. 消费者处理完消息，提交 offset 前挂掉 → 重启后从上次 offset 重新消费
+2. 消费者处理超时，被 Kafka 认为宕机，触发 rebalance，消息被其他消费者重新消费
+3. 生产者开启重试，网络抖动导致 broker 已写入但 ack 未返回，生产者重发
+
+### 生产者侧：开启幂等生产
+
+Kafka 0.11+ 支持 exactly-once 语义，配置生产者幂等：
+
+```ini
+enable.idempotence=true
+acks=all
+retries=2147483647
+```
+
+开启后 Kafka 为每条消息分配序列号，broker 自动去重，避免生产者重试导致的重复写入。
+
+### 消费者侧：用 topic + partition + offset 作唯一 ID
+
+```java
+@KafkaListener(topics = "order-topic", groupId = "order-group")
+public void consume(ConsumerRecord<String, String> record) {
+    String msgId = record.topic() + "-" + record.partition() + "-" + record.offset();
+
+    if (redis.exists("msg:" + msgId)) {
+        return; // 已处理，跳过
+    }
+
+    // 处理业务逻辑
+    businessService.process(record.value());
+
+    redis.set("msg:" + msgId, "1", 24, TimeUnit.HOURS);
+}
+```
+
+### 总结
+
+| 层面 | 方案 |
+|------|------|
+| 生产者 | `enable.idempotence=true` |
+| 消费者 | Redis/DB 去重 + 唯一索引 + 乐观锁 |
+| 业务设计 | 让操作本身幂等（如 upsert 代替 insert） |
+
+最稳的做法是生产者 + 消费者两侧都做，不依赖单一保障。

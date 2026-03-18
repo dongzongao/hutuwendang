@@ -337,7 +337,7 @@ sh startup.sh -m standalone
 
 **application.properties**：
 
-```properties
+```ini
 # MySQL配置
 spring.datasource.platform=mysql
 db.num=1
@@ -457,7 +457,7 @@ spring:
 
 **application.properties**：
 
-```properties
+```ini
 nacos.core.auth.enabled=true
 nacos.core.auth.system.type=nacos
 nacos.core.auth.plugin.nacos.token.secret.key=SecretKey012345678901234567890123456789012345678901234567890123456789
@@ -544,7 +544,7 @@ curl http://127.0.0.1:8848/nacos/v1/cs/configs
 
 **日志级别配置**：
 
-```properties
+```ini
 logging.level.com.alibaba.nacos=INFO
 ```
 
@@ -730,7 +730,7 @@ dubbo:
 
 ### 1. 服务端优化
 
-```properties
+```ini
 # 线程池配置
 nacos.naming.distro.taskDispatchThreadCount=10
 nacos.naming.distro.batchSyncKeyCount=1000

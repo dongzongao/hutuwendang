@@ -13,6 +13,7 @@ export default defineConfig({
       { text: 'JVM', link: '/jvm/JVM详解' },
       { text: 'Spring', link: '/spring/SpringBoot详解' },
       { text: '数据库', link: '/database/MySQL详解' },
+      { text: '中间件', link: '/middleware/Nacos详解' },
       { text: '网络', link: '/network/HTTP与HTTPS细节区别' },
       { text: '算法', link: '/algorithm/算法学习路径' },
       { text: '方法论', link: '/methodology/开发方法论' },
@@ -60,6 +61,9 @@ export default defineConfig({
             { text: 'MySQL 详解', link: '/database/MySQL详解' },
             { text: 'MySQL 与 SpringBoot 事务', link: '/database/MySQL和SpringBoot事务详解' },
             { text: '数据库回表问题', link: '/database/数据库回表问题详解' },
+            { text: 'MVCC 详解', link: '/database/MVCC详解' },
+            { text: 'B 树与 B+ 树', link: '/database/B树与B+树详解' },
+            { text: 'MyBatis 核心原理', link: '/database/MyBatis核心原理' },
           ]
         }
       ],
@@ -81,6 +85,7 @@ export default defineConfig({
             { text: '微服务服务治理', link: '/middleware/微服务服务治理' },
             { text: 'Nginx 与 Gateway 对比', link: '/middleware/Nginx与Gateway对比详解' },
             { text: 'MQ 重复消费解决方案', link: '/middleware/MQ重复消费解决方案' },
+            { text: 'Kafka 消息投递与重试', link: '/middleware/Kafka消息投递与重试' },
           ]
         }
       ],
