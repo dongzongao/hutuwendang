@@ -15,6 +15,7 @@ export default defineConfig({
       { text: '数据库', link: '/database/MySQL详解' },
       { text: '中间件', link: '/middleware/Nacos详解' },
       { text: '网络', link: '/network/HTTP与HTTPS细节区别' },
+      { text: '搜索引擎', link: '/search/Elasticsearch详解' },
       { text: '算法', link: '/algorithm/算法学习路径' },
       { text: '方法论', link: '/methodology/开发方法论' },
     ],
@@ -115,6 +116,18 @@ export default defineConfig({
           text: '架构设计',
           items: [
             { text: '幂等设计', link: '/architecture/幂等设计详解' },
+          ]
+        }
+      ],
+      '/search/': [
+        {
+          text: '搜索引擎',
+          items: [
+            { text: 'Elasticsearch 详解', link: '/search/Elasticsearch详解' },
+            { text: 'FST 详解', link: '/search/FST详解' },
+            { text: 'Roaring Bitmap 详解', link: '/search/RoaringBitmap详解' },
+            { text: 'BM25 算法详解', link: '/search/BM25算法详解' },
+            { text: 'Canal 数据同步', link: '/search/Canal数据同步详解' },
           ]
         }
       ],
