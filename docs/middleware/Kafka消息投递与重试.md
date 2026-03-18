@@ -1,3 +1,8 @@
+---
+title: Kafka 消息投递与重试
+description: 深入解析 Kafka 消息投递语义（at-most-once/at-least-once/exactly-once），acks 配置、ISR 副本同步、消费者重试、死信队列（DLT）及事务消息原理。
+---
+
 # Kafka 消息投递与重试
 
 ## 投递语义

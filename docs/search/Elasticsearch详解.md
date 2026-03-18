@@ -1,3 +1,8 @@
+---
+title: Elasticsearch 详解
+description: 深入解析 Elasticsearch 核心原理，包括倒排索引、集群架构、Segment 写入流程、Query Then Fetch 两阶段查询、BM25 评分、深分页优化及与 MySQL 协同架构。
+---
+
 # Elasticsearch 详解
 
 ## 核心概念

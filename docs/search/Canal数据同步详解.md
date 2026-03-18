@@ -1,3 +1,8 @@
+---
+title: Canal 数据同步详解
+description: 深入解析 Canal 数据同步原理，MySQL Binlog 订阅机制、伪装 Slave 实现增量同步、MySQL 到 Elasticsearch 的实时同步架构及 ZooKeeper 高可用部署方案。
+---
+
 # Canal 数据同步详解
 
 ## 是什么

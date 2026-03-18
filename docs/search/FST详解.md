@@ -1,3 +1,8 @@
+---
+title: FST 详解
+description: 深入解析 FST（有限状态转换器）原理，Lucene/Elasticsearch 用于 Term Dictionary 的核心数据结构，前缀与后缀共享压缩，与 Trie 树的对比分析。
+---
+
 # FST 详解（有限状态转换器）
 
 ## 是什么

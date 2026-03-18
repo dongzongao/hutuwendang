@@ -1,3 +1,8 @@
+---
+title: MyBatis 核心原理
+description: 深入解析 MyBatis 核心原理，包括 JDK 动态代理生成 Mapper、MappedStatement 解析、SqlSource 动态 SQL 拼装、Executor 执行器类型及一级二级缓存机制。
+---
+
 # MyBatis 核心原理
 
 ## 整体架构

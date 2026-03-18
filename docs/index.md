@@ -1,5 +1,7 @@
 ---
 layout: home
+title: 后端技术文档
+description: Java 后端开发技术文档，深入讲解 JVM、Spring、MySQL、Redis、Kafka、Elasticsearch、网络协议、算法等核心原理，持续更新。
 
 hero:
   name: 后端技术文档
@@ -25,13 +27,16 @@ features:
     details: SpringBoot、IOC 容器、WebFlux、Reactor 响应式编程
   - icon: 🗄️
     title: 数据库
-    details: MySQL、事务、索引回表
+    details: MySQL、事务、索引回表、MVCC、B+树、MyBatis 原理
   - icon: ⚡
     title: 缓存
     details: Redis 原理与源码解读
   - icon: 🔗
     title: 中间件 & 微服务
-    details: Nacos、ZooKeeper、微服务治理、Gateway、MQ
+    details: Nacos、ZooKeeper、微服务治理、Gateway、Kafka、MQ
+  - icon: 🔍
+    title: 搜索引擎
+    details: Elasticsearch 原理、FST、Roaring Bitmap、BM25、Canal 同步
   - icon: 🌐
     title: 网络 & 协议
     details: HTTP/HTTPS、HTTP/2、TCP/UDP、多路复用、通信协议

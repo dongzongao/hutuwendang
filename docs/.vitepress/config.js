@@ -2,8 +2,21 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   title: '后端技术文档',
-  description: 'Java 后端开发技术文档，涵盖 JVM、Spring、数据库、中间件、网络、算法等方向',
+  titleTemplate: ':title | 后端技术文档',
+  description: 'Java 后端开发技术文档，深入讲解 JVM、Spring、MySQL、Redis、Kafka、Elasticsearch、网络协议、算法等核心原理，持续更新。',
   lang: 'zh-CN',
+  cleanUrls: true,
+  lastUpdated: true,
+  head: [
+    ['meta', { name: 'keywords', content: 'Java,JVM,Spring,SpringBoot,MySQL,Redis,Kafka,Elasticsearch,MyBatis,MVCC,B+树,网络协议,算法,后端开发' }],
+    ['meta', { name: 'author', content: 'dongzongao' }],
+    ['meta', { name: 'robots', content: 'index, follow' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:title', content: '后端技术文档' }],
+    ['meta', { property: 'og:description', content: 'Java 后端开发技术文档，深入讲解 JVM、Spring、MySQL、Redis、Kafka、Elasticsearch 等核心原理' }],
+    ['meta', { property: 'og:site_name', content: '后端技术文档' }],
+    ['link', { rel: 'canonical', href: 'https://dongzongao.github.io/hutuwendang/' }],
+  ],
   themeConfig: {
     logo: '📚',
     nav: [

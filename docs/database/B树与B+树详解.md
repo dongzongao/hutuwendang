@@ -1,3 +1,8 @@
+---
+title: B 树与 B+ 树详解
+description: 深入对比 B 树与 B+ 树的数据结构差异，分析 MySQL InnoDB 选择 B+ 树的原因，包括节点结构、叶子链表设计、范围查询性能及磁盘 IO 优化。
+---
+
 # B 树与 B+ 树详解
 
 ## B 树（B-Tree）

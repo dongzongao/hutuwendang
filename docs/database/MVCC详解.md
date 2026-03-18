@@ -1,3 +1,8 @@
+---
+title: MVCC 详解
+description: 深入解析 MySQL InnoDB MVCC 多版本并发控制原理，包括隐藏字段、undo log 版本链、Read View 可见性判断算法，以及 RC 与 RR 隔离级别的本质区别。
+---
+
 # MVCC 详解
 
 ## 什么是 MVCC

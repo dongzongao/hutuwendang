@@ -1,3 +1,8 @@
+---
+title: Roaring Bitmap 详解
+description: 深入解析 Roaring Bitmap 压缩位图原理，Array/Bitmap/Run 三种容器自适应选择策略，Elasticsearch 倒排列表与 Filter 缓存的底层实现。
+---
+
 # Roaring Bitmap 详解
 
 ## 是什么
