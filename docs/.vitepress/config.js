@@ -29,6 +29,7 @@ export default defineConfig({
       { text: '中间件', link: '/middleware/Nacos详解' },
       { text: '网络', link: '/network/HTTP与HTTPS细节区别' },
       { text: '搜索引擎', link: '/search/Elasticsearch详解' },
+      { text: '锁', link: '/lock/锁概览' },
       { text: '算法', link: '/algorithm/算法学习路径' },
       { text: '方法论', link: '/methodology/开发方法论' },
     ],
@@ -53,6 +54,7 @@ export default defineConfig({
           items: [
             { text: 'JVM 详解', link: '/jvm/JVM详解' },
             { text: 'G1 和 ZGC 垃圾回收器', link: '/jvm/G1和ZGC垃圾回收器详解' },
+            { text: '三色标记算法', link: '/jvm/三色标记算法详解' },
             { text: '类加载机制', link: '/jvm/类加载机制详解' },
           ]
         }
@@ -78,6 +80,8 @@ export default defineConfig({
             { text: 'MVCC 详解', link: '/database/MVCC详解' },
             { text: 'B 树与 B+ 树', link: '/database/B树与B+树详解' },
             { text: 'MyBatis 核心原理', link: '/database/MyBatis核心原理' },
+            { text: 'MySQL 锁详解', link: '/database/MySQL锁详解' },
+            { text: '幻读详解', link: '/database/幻读详解' },
           ]
         }
       ],
@@ -86,7 +90,7 @@ export default defineConfig({
           text: '缓存',
           items: [
             { text: 'Redis 详解', link: '/cache/Redis详解' },
-            { text: 'Redis 源码解读', link: '/cache/Redis核心源码解读' },
+            { text: 'Redis 源码解读', link: '/cache/Redis源码解读' },
           ]
         }
       ],
@@ -129,6 +133,21 @@ export default defineConfig({
           text: '架构设计',
           items: [
             { text: '幂等设计', link: '/architecture/幂等设计详解' },
+          ]
+        }
+      ],
+      '/lock/': [
+        {
+          text: '锁',
+          items: [
+            { text: '锁概览', link: '/lock/锁概览' },
+            { text: 'MySQL 锁详解', link: '/lock/MySQL锁详解' },
+            { text: '悲观锁与乐观锁', link: '/lock/悲观锁与乐观锁' },
+            { text: 'synchronized 详解', link: '/lock/synchronized详解' },
+            { text: 'ReentrantLock 与 AQS', link: '/lock/ReentrantLock与AQS详解' },
+            { text: '读写锁详解', link: '/lock/读写锁详解' },
+            { text: 'Redis 分布式锁', link: '/lock/Redis分布式锁详解' },
+            { text: 'ZooKeeper 分布式锁', link: '/lock/ZooKeeper分布式锁详解' },
           ]
         }
       ],
