@@ -151,6 +151,7 @@ export default defineConfig({
           items: [
             { text: '幂等设计', link: '/architecture/幂等设计详解' },
             { text: 'MQ 兜底方案', link: '/architecture/MQ兜底方案详解' },
+            { text: 'MQ 架构设计', link: '/architecture/MQ架构设计详解' },
           ]
         }
       ],

@@ -1,6 +1,6 @@
 ---
 title: MQ 兜底方案详解
-description: 深入解析 MQ 消息可靠性兜底方案，包括消息丢失的各个环节分析、本地消息表、事务消息、死信队列、补偿任务等完整兜底体系设计。
+description: 深入解析 MQ 消息可靠性兜底方案，按 Kafka 和 RocketMQ 分别说明生产者、Broker、消费者三个环节的丢失场景与对应兜底策略。
 ---
 
 # MQ 兜底方案详解
@@ -11,79 +11,133 @@ description: 深入解析 MQ 消息可靠性兜底方案，包括消息丢失的
 生产者 → [①发送丢失] → Broker → [②存储丢失] → 消费者 → [③消费丢失]
 ```
 
-兜底方案需要覆盖每个环节。
-
 ---
 
-## 环节一：生产者发送丢失
+## Kafka 兜底方案
 
-### 问题
+### ① 生产者发送丢失
 
-网络抖动、Broker 宕机导致消息未到达 Broker，生产者未感知。
+**原因：** 网络抖动、Broker 宕机，消息未到达，生产者未感知。
 
-### 方案：本地消息表
+**方案：acks + 重试 + 本地消息表**
 
+```ini
+# 等待所有 ISR 副本确认，最安全
+acks=all
+
+# 开启幂等，防止重试导致重复写入
+enable.idempotence=true
+
+# 重试次数
+retries=2147483647
+retry.backoff.ms=100
 ```
-1. 业务操作 + 写入本地消息表（同一事务）
-2. 异步线程扫描消息表，发送未发送的消息
-3. 发送成功后更新消息状态为"已发送"
-4. 定时补偿：扫描超时未确认的消息，重新发送
-```
 
-```sql
-CREATE TABLE local_message (
-    id          BIGINT PRIMARY KEY AUTO_INCREMENT,
-    biz_id      VARCHAR(64) NOT NULL,       -- 业务唯一 ID
-    topic       VARCHAR(128) NOT NULL,
-    content     TEXT NOT NULL,
-    status      TINYINT DEFAULT 0,          -- 0=待发送 1=已发送 2=已确认
-    retry_count INT DEFAULT 0,
-    next_retry  DATETIME,
-    created_at  DATETIME DEFAULT NOW(),
-    UNIQUE KEY uk_biz_id (biz_id)
-);
-```
+本地消息表兜底（防止重试也失败的极端情况）：
 
 ```java
 @Transactional
 public void createOrder(Order order) {
-    // 1. 业务操作
     orderMapper.insert(order);
-
-    // 2. 写入本地消息表（同一事务，原子性）
-    LocalMessage msg = new LocalMessage();
-    msg.setBizId(order.getId());
-    msg.setTopic("order-created");
-    msg.setContent(JSON.toJSONString(order));
-    localMessageMapper.insert(msg);
+    // 同一事务写入消息表
+    localMessageMapper.insert(new LocalMessage("order-created", JSON.toJSONString(order)));
 }
 
-// 定时任务：扫描待发送消息
+// 定时补偿：扫描超时未发送的消息
 @Scheduled(fixedDelay = 5000)
-public void sendPendingMessages() {
-    List<LocalMessage> msgs = localMessageMapper.selectPending();
-    for (LocalMessage msg : msgs) {
+public void retryPendingMessages() {
+    localMessageMapper.selectPending().forEach(msg -> {
         try {
-            mqTemplate.send(msg.getTopic(), msg.getContent());
-            localMessageMapper.updateStatus(msg.getId(), SENT);
+            kafkaTemplate.send(msg.getTopic(), msg.getContent()).get();
+            localMessageMapper.markSent(msg.getId());
         } catch (Exception e) {
             localMessageMapper.incrementRetry(msg.getId());
         }
+    });
+}
+```
+
+### ② Broker 存储丢失
+
+**原因：** 消息写入 PageCache 后 Broker 宕机，未 fsync 到磁盘。
+
+**方案：多副本 + min.insync.replicas**
+
+```ini
+# 副本数（建议 3）
+replication.factor=3
+
+# 最少同步副本数，低于此数量拒绝写入
+min.insync.replicas=2
+
+# 生产者端配合
+acks=all
+```
+
+```
+3 副本：Leader + 2 Follower
+min.insync.replicas=2：至少 2 个副本写入才返回成功
+即使 1 个节点宕机，数据仍安全
+```
+
+### ③ 消费者消费丢失
+
+**原因：** 自动提交 offset，业务处理失败但 offset 已提交。
+
+**方案：手动提交 + 重试 + 死信队列（DLT）**
+
+```java
+// 关闭自动提交
+spring.kafka.consumer.enable-auto-commit=false
+
+@KafkaListener(topics = "order-topic")
+public void consume(ConsumerRecord<String, String> record, Acknowledgment ack) {
+    try {
+        orderService.process(record.value());
+        ack.acknowledge(); // 处理成功才提交 offset
+    } catch (Exception e) {
+        // 不 ack，消息重新投递
+        log.error("消费失败，等待重试: {}", record.offset(), e);
     }
 }
 ```
 
-### 方案：事务消息（RocketMQ）
+死信队列配置（重试 3 次后进 DLT）：
 
-RocketMQ 原生支持事务消息，无需本地消息表：
+```java
+@Bean
+public ConcurrentKafkaListenerContainerFactory<String, String> factory(
+        ConsumerFactory<String, String> cf, KafkaTemplate<String, String> template) {
+    var factory = new ConcurrentKafkaListenerContainerFactory<String, String>();
+    factory.setConsumerFactory(cf);
+    var recoverer = new DeadLetterPublishingRecoverer(template);
+    // 指数退避：1s、2s、4s，共 3 次
+    factory.setCommonErrorHandler(new DefaultErrorHandler(
+        recoverer, new ExponentialBackOff(1000L, 2.0)));
+    return factory;
+}
+```
 
+---
+
+## RocketMQ 兜底方案
+
+### ① 生产者发送丢失
+
+**原因：** 网络问题或 Broker 故障导致发送失败。
+
+**方案一：同步发送 + 重试**
+
+```java
+// 同步发送，失败自动重试（默认重试 2 次）
+SendResult result = producer.send(msg);
+if (result.getSendStatus() != SendStatus.SEND_OK) {
+    // 记录本地消息表，等待补偿
+    localMessageMapper.insert(failedMsg);
+}
 ```
-1. 发送半消息（Half Message）到 Broker，消费者不可见
-2. 执行本地事务
-3. 本地事务成功 → 提交消息（消费者可见）
-   本地事务失败 → 回滚消息（删除）
-4. Broker 超时未收到确认 → 回查生产者事务状态
-```
+
+**方案二：事务消息（强一致场景）**
 
 ```java
 TransactionMQProducer producer = new TransactionMQProducer("group");
@@ -91,7 +145,7 @@ producer.setTransactionListener(new TransactionListener() {
     @Override
     public LocalTransactionState executeLocalTransaction(Message msg, Object arg) {
         try {
-            orderService.createOrder((Order) arg);
+            orderService.createOrder((Order) arg); // 本地事务
             return LocalTransactionState.COMMIT_MESSAGE;
         } catch (Exception e) {
             return LocalTransactionState.ROLLBACK_MESSAGE;
@@ -100,7 +154,7 @@ producer.setTransactionListener(new TransactionListener() {
 
     @Override
     public LocalTransactionState checkLocalTransaction(MessageExt msg) {
-        // Broker 回查：检查本地事务是否执行成功
+        // Broker 超时回查：检查本地事务是否成功
         String bizId = msg.getUserProperty("bizId");
         return orderService.exists(bizId)
             ? LocalTransactionState.COMMIT_MESSAGE
@@ -109,109 +163,103 @@ producer.setTransactionListener(new TransactionListener() {
 });
 ```
 
----
+### ② Broker 存储丢失
 
-## 环节二：Broker 存储丢失
+**原因：** 异步刷盘模式下 Broker 宕机，PageCache 中的消息丢失。
 
-### 问题
+**方案：同步刷盘 + 主从同步复制**
 
-消息写入 Broker 内存后，Broker 宕机，消息未持久化到磁盘。
-
-### 方案
-
-**Kafka：**
 ```ini
-# 每条消息同步刷盘（性能损耗大，重要场景使用）
-log.flush.interval.messages=1
-
-# 多副本 + 等待所有 ISR 确认
-acks=all
-replication.factor=3
-min.insync.replicas=2
-```
-
-**RocketMQ：**
-```ini
-# 同步刷盘（默认异步）
+# Broker 配置
+# 同步刷盘（默认 ASYNC_FLUSH，性能高但有丢失风险）
 flushDiskType=SYNC_FLUSH
 
-# 主从同步复制
+# 主从同步复制（默认 ASYNC_MASTER）
 brokerRole=SYNC_MASTER
 ```
 
----
+| 配置 | 性能 | 可靠性 |
+|------|------|--------|
+| ASYNC_FLUSH + ASYNC_MASTER | 最高 | 最低，可能丢消息 |
+| SYNC_FLUSH + ASYNC_MASTER | 中 | 中，刷盘安全但主从可能不一致 |
+| SYNC_FLUSH + SYNC_MASTER | 最低 | 最高，金融场景推荐 |
 
-## 环节三：消费者消费丢失
+### ③ 消费者消费丢失
 
-### 问题
+**原因：** 消费者返回 CONSUME_SUCCESS 但业务实际未处理成功。
 
-消费者拉取消息后，业务处理失败或进程崩溃，消息被标记为已消费但实际未处理。
-
-### 方案：手动 ACK + 重试
+**方案：消费失败返回 RECONSUME_LATER + 死信队列**
 
 ```java
-// Kafka：关闭自动提交，手动提交 offset
-@KafkaListener(topics = "order-topic")
-public void consume(ConsumerRecord<String, String> record,
-                    Acknowledgment ack) {
-    try {
-        orderService.process(record.value());
-        ack.acknowledge();  // 处理成功才提交 offset
-    } catch (Exception e) {
-        // 不 ack，消息会重新投递
-        log.error("消费失败，等待重试", e);
+@RocketMQMessageListener(topic = "order-topic", consumerGroup = "order-group")
+public class OrderConsumer implements RocketMQListener<MessageExt> {
+    @Override
+    public void onMessage(MessageExt message) {
+        try {
+            orderService.process(message);
+            // 正常消费，RocketMQ 自动 ACK
+        } catch (Exception e) {
+            // 抛出异常 → RocketMQ 自动重试（默认 16 次，间隔递增）
+            // 16 次后进入死信队列 %DLQ%order-group
+            throw new RuntimeException("消费失败，触发重试", e);
+        }
     }
 }
 ```
 
-### 方案：死信队列（DLT）兜底
+RocketMQ 重试间隔（16 次）：
+```
+10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
+```
 
-```
-消费失败
-  ↓ 重试 N 次（指数退避）
-仍失败
-  ↓
-发送到死信 topic（original-topic.DLT）
-  ↓
-告警通知 + 人工处理 / 定时重新投递
-```
+死信队列消费（人工处理）：
 
 ```java
-@Bean
-public ConcurrentKafkaListenerContainerFactory<String, String> factory(
-        ConsumerFactory<String, String> cf,
-        KafkaTemplate<String, String> template) {
-    var factory = new ConcurrentKafkaListenerContainerFactory<String, String>();
-    factory.setConsumerFactory(cf);
-
-    // 重试 3 次（1s、2s、4s 指数退避），失败后进死信
-    var recoverer = new DeadLetterPublishingRecoverer(template);
-    var backOff = new ExponentialBackOff(1000L, 2.0);
-    backOff.setMaxAttempts(3);
-    factory.setCommonErrorHandler(new DefaultErrorHandler(recoverer, backOff));
-    return factory;
+@RocketMQMessageListener(
+    topic = "%DLQ%order-group",
+    consumerGroup = "order-dlq-group")
+public class OrderDLQConsumer implements RocketMQListener<MessageExt> {
+    @Override
+    public void onMessage(MessageExt message) {
+        // 告警 + 记录 + 人工介入
+        alertService.send("死信消息告警: " + message.getMsgId());
+        dlqRecordMapper.insert(message);
+    }
 }
 ```
 
 ---
 
-## 完整兜底体系
+## 通用兜底：本地消息表
 
+无论 Kafka 还是 RocketMQ，本地消息表是最终兜底手段：
+
+```sql
+CREATE TABLE local_message (
+    id          BIGINT PRIMARY KEY AUTO_INCREMENT,
+    biz_id      VARCHAR(64) NOT NULL,
+    topic       VARCHAR(128) NOT NULL,
+    content     TEXT NOT NULL,
+    status      TINYINT DEFAULT 0,   -- 0=待发送 1=已发送 2=已确认
+    retry_count INT DEFAULT 0,
+    next_retry  DATETIME,
+    created_at  DATETIME DEFAULT NOW(),
+    UNIQUE KEY uk_biz_id (biz_id)
+);
 ```
-生产者
-  ├── 本地消息表 / 事务消息（保证发送）
-  └── 定时补偿任务（扫描未确认消息重发）
 
-Broker
-  ├── 同步刷盘（防止宕机丢消息）
-  └── 多副本同步（防止单点故障）
+---
 
-消费者
-  ├── 手动 ACK（处理成功才确认）
-  ├── 重试机制（指数退避，避免瞬时故障）
-  ├── 死信队列（兜底，人工介入）
-  └── 幂等消费（防止重试导致重复处理）
-```
+## 兜底能力对比
+
+| 能力 | Kafka | RocketMQ |
+|------|-------|----------|
+| 生产者重试 | 手动配置 retries | 自动重试，默认 2 次 |
+| 事务消息 | 支持，配置复杂 | 原生支持，回查机制完善 |
+| Broker 持久化 | 多副本 + min.insync.replicas | 同步刷盘 + 主从同步 |
+| 消费重试 | 需手动实现（不 ack） | 自动重试 16 次，间隔递增 |
+| 死信队列 | DLT（需配置） | %DLQ% 原生支持 |
+| 消息轨迹 | 无 | 原生支持，可追踪每条消息 |
 
 ---
 
@@ -220,6 +268,6 @@ Broker
 | 监控项 | 告警阈值 | 处理方式 |
 |--------|----------|----------|
 | 本地消息表积压 | 超过 100 条待发送 | 检查 MQ 连通性 |
-| 消费者 lag 增长 | 持续增长超 5 分钟 | 扩容消费者 |
-| 死信队列有消息 | 任意消息进入 DLT | 立即告警，人工排查 |
-| 重试次数异常 | 单消息重试 > 3 次 | 检查消费者业务逻辑 |
+| 消费者 lag 持续增长 | 超过 5 分钟 | 扩容消费者实例 |
+| 死信队列有消息 | 任意消息进入 | 立即告警，人工排查 |
+| Broker 磁盘使用率 | 超过 80% | 扩容或清理过期消息 |
