@@ -22,14 +22,31 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '说明', link: '/guide' },
-      { text: 'Java', link: '/java/Java基础' },
-      { text: 'JVM', link: '/jvm/JVM详解' },
-      { text: 'Spring', link: '/spring/SpringBoot详解' },
-      { text: '数据库', link: '/database/MySQL详解' },
-      { text: '中间件', link: '/middleware/Nacos详解' },
+      {
+        text: 'Java & JVM',
+        items: [
+          { text: 'Java', link: '/java/Java基础' },
+          { text: 'JVM', link: '/jvm/JVM详解' },
+          { text: 'Spring', link: '/spring/SpringBoot详解' },
+        ]
+      },
+      {
+        text: '存储',
+        items: [
+          { text: '数据库', link: '/database/MySQL详解' },
+          { text: '缓存', link: '/cache/Redis详解' },
+          { text: '搜索引擎', link: '/search/Elasticsearch详解' },
+        ]
+      },
+      {
+        text: '分布式',
+        items: [
+          { text: '中间件', link: '/middleware/Nacos详解' },
+          { text: '锁', link: '/lock/锁概览' },
+          { text: '架构设计', link: '/architecture/幂等设计详解' },
+        ]
+      },
       { text: '网络', link: '/network/HTTP与HTTPS细节区别' },
-      { text: '搜索引擎', link: '/search/Elasticsearch详解' },
-      { text: '锁', link: '/lock/锁概览' },
       { text: '算法', link: '/algorithm/算法学习路径' },
       { text: '方法论', link: '/methodology/开发方法论' },
     ],
@@ -133,6 +150,7 @@ export default defineConfig({
           text: '架构设计',
           items: [
             { text: '幂等设计', link: '/architecture/幂等设计详解' },
+            { text: 'MQ 兜底方案', link: '/architecture/MQ兜底方案详解' },
           ]
         }
       ],
@@ -170,6 +188,7 @@ export default defineConfig({
             { text: '算法学习路径', link: '/algorithm/算法学习路径' },
             { text: '算法题与解题思路', link: '/algorithm/算法题与解题思路' },
             { text: '时间与空间复杂度', link: '/algorithm/时间与空间复杂度' },
+            { text: '红黑树详解', link: '/algorithm/红黑树详解' },
           ]
         }
       ],
