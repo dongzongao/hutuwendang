@@ -96,6 +96,7 @@ export default defineConfig({
             { text: '数据库回表问题', link: '/database/数据库回表问题详解' },
             { text: 'MVCC 详解', link: '/database/MVCC详解' },
             { text: 'B 树与 B+ 树', link: '/database/B树与B+树详解' },
+            { text: '红黑树详解', link: '/database/红黑树详解' },
             { text: 'MyBatis 核心原理', link: '/database/MyBatis核心原理' },
             { text: 'MySQL 锁详解', link: '/database/MySQL锁详解' },
             { text: '幻读详解', link: '/database/幻读详解' },
@@ -187,9 +188,19 @@ export default defineConfig({
           text: '算法',
           items: [
             { text: '算法学习路径', link: '/algorithm/算法学习路径' },
-            { text: '算法题与解题思路', link: '/algorithm/算法题与解题思路' },
+            { text: '算法题分类导航', link: '/algorithm/算法题与解题思路' },
             { text: '时间与空间复杂度', link: '/algorithm/时间与空间复杂度' },
-            { text: '红黑树详解', link: '/algorithm/红黑树详解' },
+          ]
+        },
+        {
+          text: '按题型分类',
+          items: [
+            { text: '哈希表', link: '/algorithm/哈希表算法题' },
+            { text: '双指针 & 滑动窗口', link: '/algorithm/双指针算法题' },
+            { text: '动态规划', link: '/algorithm/动态规划算法题' },
+            { text: '栈与队列', link: '/algorithm/栈与队列算法题' },
+            { text: '树与 BFS', link: '/algorithm/树与BFS算法题' },
+            { text: '排序算法', link: '/algorithm/排序算法题' },
           ]
         }
       ],
