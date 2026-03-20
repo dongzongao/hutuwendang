@@ -89,6 +89,7 @@ npm run dev
 | Nginx 与 Gateway 对比 | Nginx 事件驱动模型、upstream 负载均衡算法、Spring Cloud Gateway 过滤器链、动态路由刷新机制 |
 | MQ 重复消费解决方案 | 幂等消费设计、数据库唯一索引兜底、Redis SETNX 去重、消息表与业务同一事务的强一致方案 |
 | Kafka 消息投递与重试 | ISR 副本同步机制、acks 三种模式的可靠性权衡、消费者 rebalance 触发条件、死信队列（DLT）设计、事务消息 exactly-once |
+| 中间件开发流程 | Netty 网络层搭建、自定义二进制协议设计、Reactor 线程模型选型、SPI 扩展机制（Dubbo 风格）、序列化选型对比、优雅启动关闭与生产监控 |
 
 ---
 
@@ -114,6 +115,7 @@ npm run dev
 | TCP 与 UDP | 三次握手/四次挥手状态机、TIME_WAIT 存在原因、滑动窗口与拥塞控制（慢启动/拥塞避免/快重传） |
 | 多路复用 | select/poll/epoll 三者对比、epoll ET/LT 触发模式、Reactor 模式与 Proactor 模式 |
 | 通信协议 | OSI 七层模型与 TCP/IP 四层对应关系、常见应用层协议（DNS/DHCP/SMTP）工作原理 |
+| IO 模型详解 | BIO/NIO/IO 多路复用/AIO 五种模型两阶段原理、select/poll/epoll 内部结构对比、epoll ET 与 LT 触发模式、Redis/Nginx/Netty 的 IO 模型选型 |
 
 ---
 

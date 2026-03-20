@@ -122,6 +122,7 @@ export default defineConfig({
             { text: 'Nginx 与 Gateway 对比', link: '/middleware/Nginx与Gateway对比详解' },
             { text: 'MQ 重复消费解决方案', link: '/middleware/MQ重复消费解决方案' },
             { text: 'Kafka 消息投递与重试', link: '/middleware/Kafka消息投递与重试' },
+            { text: '中间件开发流程', link: '/middleware/中间件开发流程' },
           ]
         }
       ],
@@ -135,6 +136,7 @@ export default defineConfig({
             { text: 'TCP 与 UDP', link: '/network/TCP与UDP差异详解' },
             { text: '多路复用', link: '/network/多路复用详解' },
             { text: '通信协议', link: '/network/通信协议详解' },
+            { text: 'IO 模型详解', link: '/network/IO模型详解' },
           ]
         }
       ],
